@@ -7,15 +7,16 @@ AudioPlayer song;
 FFT fft;
 
 boolean rec = false;
-String file = "../media/untitled.mp3"; 
+String file = "../media/terra.mp3"; 
 // Variables that define the "zones" of the spectrum
 // For example, for bass, we take only the first 3% of the total spectrum
-float specLow = 0.025; // 3%
-float specMid = 0.03;  // 12.5%
+float specLow = 0.03; // 3%
+float specMid = 0.15;  // 12%
 float specHi = 0.35;   // 20%
-// This leaves 64% of the possible spectrum that will not be used.
+// This leaves 65% of the possible spectrum that will not be used.
 // These values are usually too high for the human ear anyway.
 
+float th1, th2, th3;
 // Scoring values for each zone
 float scoreLow = 0;
 float scoreMid = 0;
@@ -41,6 +42,8 @@ Cube[] cubes;
 // Lines that appear on the sides
 int nbMurs;
 Mur[] murs;
+
+int specSize;
  
 void setup()
 {
@@ -54,8 +57,13 @@ void setup()
   song = minim.loadFile(file);
   // Create the FFT object to analyze the song
   fft = new FFT(song.bufferSize(), song.sampleRate());
+  specSize = fft.specSize();
   
-  //// One cube per frequency band
+  th1 = specSize*specLow;
+  th2 = specSize*specMid;
+  th3 = specSize*specHi;
+  
+  // One cube per frequency band
   //nbCubes = (int)(fft.specSize()*specHi);
   //nbCubes = fft.specSize(); // this should be used going by comment
   cubes = new Cube[nbCubes];
@@ -110,27 +118,26 @@ void draw()
   scoreMid = 0;
   scoreHi = 0;
   
-  int specSize = fft.specSize();
   // Calculate the new "scores"
-  for(int i = 0; i < specSize*specLow; i++)
+  for(int i = 0; i < th1; i++)
     scoreLow += fft.getBand(i);
     
-  for(int i = (int)(specSize*specLow); i < specSize*specMid; i++)
+  for(int i = (int)(th1); i < th2; i++)
     scoreMid += fft.getBand(i);
 
-  for(int i = (int)(specSize*specMid); i < specSize*specHi; i++)
+  for(int i = (int)(th2); i < th3; i++)
     scoreHi += fft.getBand(i);
 
   // To slow down the descent.
-  if (oldScoreLow > scoreLow) {
+  if (oldScoreLow - scoreDecreaseRate > scoreLow) {
     scoreLow = oldScoreLow - scoreDecreaseRate;
   }
   
-  if (oldScoreMid > scoreMid) {
+  if (oldScoreMid - scoreDecreaseRate > scoreMid) {
     scoreMid = oldScoreMid - scoreDecreaseRate;
   }
   
-  if (oldScoreHi > scoreHi) {
+  if (oldScoreHi - scoreDecreaseRate > scoreHi) {
     scoreHi = oldScoreHi - scoreDecreaseRate;
   }
   
@@ -193,7 +200,8 @@ void draw()
   {
     // Value of the frequency band
     float bandValue = fft.getBand(i);
-    cubes[i].display(scoreLow, scoreMid, scoreHi, bandValue, scoreGlobal);
+    color displayColor = color(scoreLow*0.9, scoreMid*0.9, scoreHi*0.9, bandValue*500); // THIS CAN BE PLAYED WITH
+    cubes[i].display(displayColor, bandValue, scoreGlobal);
   }
   
   // Rectangular walls

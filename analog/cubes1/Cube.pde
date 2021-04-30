@@ -22,9 +22,8 @@ class Cube {
     rotZ = random(-1, 1);
   }
   
-  void display(float scoreLow, float scoreMid, float scoreHi, float intensity, float scoreGlobal) {
+  void display(color displayColor, float intensity, float scoreGlobal) {
     //Selection of color, opacity determined by intensity (volume of the tape)
-    color displayColor = color(scoreLow*0.9, scoreMid*0.9, scoreHi*0.9, intensity*500); // THIS CAN BE PLAYED WITH
     fill(displayColor);
     
     // Color lines, they disappear with the individual intensity of the cube

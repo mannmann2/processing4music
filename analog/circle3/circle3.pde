@@ -19,6 +19,7 @@ float specHi = 1.0;   // 20%
 // This leaves 64% of the possible spectrum that will not be used.
 // These values are usually too high for the human ear anyway.
 
+float th1, th2, th3;
 // Scoring values for each zone
 float scoreLow = 0;
 float scoreMid = 0;
@@ -35,9 +36,9 @@ float oldScoreHi = scoreHi;
 
 // Softening value
 float scoreDecreaseRate = 25;
+int specSize;
 
 // Cubes that appear in space
-int nbCubes;
 Circle[] cubes;
 float val;
  
@@ -56,13 +57,16 @@ void setup()
   fft = new FFT(song.bufferSize(), song.sampleRate());
   
   // One circle per frequency band
-  nbCubes = fft.specSize();
-  println(nbCubes);
+  specSize = fft.specSize();
+  th1 = specSize*specLow;
+  th2 = specSize*specMid;
+  th3 = specSize*specHi;
+  println(specSize);
   
-  cubes = new Circle[nbCubes];
+  cubes = new Circle[specSize];
   
   // Create all objects
-  for (int i = 0; i < nbCubes; i++) {
+  for (int i = 0; i < specSize; i++) {
    cubes[i] = new Circle(i); 
   }
 
@@ -97,10 +101,6 @@ void draw()
   scoreMid = 0;
   scoreHi = 0;
   
-  float th1 = nbCubes*specLow;
-  float th2 = nbCubes*specMid;
-  float th3 = nbCubes*specHi;
-  
   // Calculate the new "scores"
   for(int i = 0; i < th1; i++)
     scoreLow += fft.getBand(i);
@@ -112,15 +112,15 @@ void draw()
     scoreHi += fft.getBand(i);
 
   // To slow down the descent.
-  if (oldScoreLow - scoreLow > 25) {
+  if (oldScoreLow - scoreDecreaseRate > scoreLow) {
     scoreLow = oldScoreLow - scoreDecreaseRate;
   }
   
-  if (oldScoreMid - scoreMid > 25) {
+  if (oldScoreMid - scoreDecreaseRate > scoreMid) {
     scoreMid = oldScoreMid - scoreDecreaseRate;
   }
   
-  if (oldScoreHi - scoreHi > 25) {
+  if (oldScoreHi - scoreDecreaseRate > scoreHi) {
     scoreHi = oldScoreHi - scoreDecreaseRate;
   }
   
@@ -128,7 +128,7 @@ void draw()
   // This allows the animation to go faster for higher-pitched sounds, which is more noticeable
   float scoreGlobal = 0.66*scoreLow + 0.8*scoreMid + 1*scoreHi;
   
-  
+  println(scoreLow, scoreMid, scoreHi);
   //println(scoreLow + scoreMid + scoreHi);
   // Subtle color of background
   if (ch)
@@ -138,33 +138,29 @@ void draw()
   // The color is represented as: red for bass, green for medium sounds and blue for high.
   // Opacity is determined by the volume of the tape and the overall volume.
   
-  // Cube for each frequency band
-  
   if (scoreLow < 40 && scoreMid < 40 && scoreHi < 40) {
       scoreLow += 120;
       scoreMid += 60;
       scoreHi += 80;
     }
   
-  for(int i = 0; i < nbCubes; i++)
+  // Circle for each frequency band
+  for(int i = 0; i < specSize; i++)
   {
     // Value of the frequency band
     float bandValue = fft.getBand(i);
-    
-    //displayColor = color(bandValue%255, sat, bri);
+    //println(scoreLow, scoreMid, scoreHi, abs(cubes[i].prev - bandValue));
+
     if (i < th1) {
       displayColor = color(scoreLow, scoreMid*0.8, scoreHi*0.5); // THIS CAN BE PLAYED WITH
-      print("A ");
     }
     else if (i < th2) { 
       displayColor = color(scoreLow*0.8, scoreMid, scoreHi*0.8); // THIS CAN BE PLAYED WITH
-      print("B ");
     }
     else {
-      print("C ");
       displayColor = color(scoreLow*0.5, scoreMid*0.8, scoreHi); // THIS CAN BE PLAYED WITH
     }
-    println(scoreLow, scoreMid, scoreHi, abs(cubes[i].prev - bandValue));
+    //displayColor = color(bandValue%255, sat, bri);
     
     //if (!cubes[i].start)
     //  val = 5;
