@@ -6,7 +6,7 @@ class Cube {
 
   // Position values
   float x, y, z;  
-  int size = 75;
+  int size = 50;
   float prev = 0;
   
   //Constructeur

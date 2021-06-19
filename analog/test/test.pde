@@ -10,10 +10,10 @@ float eRadius;
 
 color displayColor;
 boolean rec = false;
-String file = "../media/terra.mp3"; 
+String file = "../media/untitled.mp3"; 
 // Variables that define the "zones" of the spectrum
 // For example, for bass, we take only the first 3% of the total spectrum
-float specLow = 0.05; // 3%
+float specLow = 0.04; // 3%
 float specMid = 0.2;  // 3%
 float specHi = 1;   // 20%
 // This leaves 65% of the possible spectrum that will not be used.
@@ -53,8 +53,8 @@ String windowName = "Rectangualr Window";
 void setup()
 {
   //Display in 3D on the entire screen
-  fullScreen(P3D);
-  //size(2000, 2000);
+  //fullScreen(P3D);
+  size(2100, 1350, P3D);
   frameRate(60);
  
   // Load the minim library
@@ -211,7 +211,7 @@ void draw()
     
     stroke(0);
     rect(100 + i*5, height-300, 5, -bandValue*40);
-    //rect(100 + i*5, height-300, 5, bandValue/a*10);
+    rect(100 + i*5, height-300, 5, a*40);
   }
   
   //float centerFrequency = 0;
