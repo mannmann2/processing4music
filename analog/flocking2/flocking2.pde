@@ -7,13 +7,12 @@ FFT fft;
 
 color displayColor;
 boolean ch = true;
-boolean start = false;
 boolean rec = false;
-String file = "../media/terra.mp3"; 
+String file = "../media/étos.mp3"; 
 // Variables that define the "zones" of the spectrum
 // For example, for bass, we take only the first 3% of the total spectrum
 float specLow = 0.03;
-float specMid = 0.1;
+float specMid = 0.4;
 float specHi = 1;
 
 // This leaves 65% of the possible spectrum that will not be used.
@@ -53,9 +52,9 @@ float g = 0.9;
 void setup()
 {
   //Display in 3D on the entire screen
-  fullScreen();
-  //size(1500,900);
-  frameRate(180);
+  //fullScreen(P3D);
+  size(1500,900);
+  frameRate(120);
   //colorMode(HSB);
   
   // Load the minim library
@@ -64,7 +63,7 @@ void setup()
   song = minim.loadFile(file);
   // Create the FFT object to analyze the song
   fft = new FFT(song.bufferSize(), song.sampleRate());
-  fft.linAverages(20);
+  fft.linAverages(50);
 
   // One boid per frequency band
   specSize = fft.specSize();
@@ -78,7 +77,7 @@ void setup()
   
   flock = new Flock();
   // Add an initial set of boids into the system
-  for (int i = 0; i < nb*3; i++) {
+  for (int i = 0; i < nb*4; i++) {
     float w = random(width);     
     float h = random(height);
 
@@ -103,19 +102,20 @@ void draw()
   //oldScoreHi = scoreHi;
   
   // Reset values
-  scoreLow = 0;
-  scoreMid = 0;
-  scoreHi = 0;
+  //scoreLow = 0;
+  //scoreMid = 0;
+  //scoreHi = 0;
+  score = 0;
   
-  // Calculate the new "scores"
-  for(int i = 0; i < th1; i++)
-    scoreLow += fft.getBand(i);
+  //// Calculate the new "scores"
+  //for(int i = 0; i < th1; i++)
+  //  scoreLow += fft.getBand(i);
     
-  for(int i = (int)(th1); i < th2; i++)
-    scoreMid += fft.getBand(i);
+  //for(int i = (int)(th1); i < th2; i++)
+  //  scoreMid += fft.getBand(i);
 
-  for(int i = (int)(th2); i < th3; i++)
-    scoreHi += fft.getBand(i);
+  //for(int i = (int)(th2); i < th3; i++)
+  //  scoreHi += fft.getBand(i);
 
   //// To slow down the descent.
   //if (oldScoreLow - scoreDecreaseRate > scoreLow) {
@@ -132,25 +132,23 @@ void draw()
   // This allows the animation to go faster for higher-pitched sounds, which is more noticeable
   //float scoreGlobal = 0.66*scoreLow + 0.8*scoreMid + 1*scoreHi;
   
-  println(scoreLow, scoreMid, scoreHi);
+  //println(scoreLow, scoreMid, scoreHi);
   //println(scoreLow + scoreMid + scoreHi);
   
   // Subtle color of background
   if (ch) {
     //colorMode(RGB, 255, 255, 255);
     //background(scoreGlobal/10, 255-sat, bri);
-    //background(255-scoreHi/20, 255-scoreMid/5, 255-scoreLow/20);  
-    background(scoreHi/10, scoreMid/10, scoreLow/10);  
+    background(255-scoreLow/10, 255-scoreMid/10, 255-scoreHi/10);  
     //background(255-max(scoreGlobal, 50));
     //background(255);
   }
   
-  score = 0;
   for(int i = 0; i < specSize; i++)
     score += fft.getBand(i);
   
   //colorMode(HSB, 360, 100, 100);
-  for(int i = 0; i < nb*3; i++)
+  for(int i = 0; i < nb*4; i++)
   {
     Boid boid = flock.boids.get(i);
     // Value of the frequency band
@@ -159,29 +157,29 @@ void draw()
     float bandValue = fft.getBand(j);
     float a = fft.getAvg(int(float(j)/specSize*fft.avgSize()));
 
-    if (j<=specSize/3) {
-      c = scoreLow;
-      //bandValue /= a1;
-      //bandValue=0;
-    }
-    else if (j<=2*specSize/3) {
-      c = scoreMid;
-      //bandValue /= a2;
-      //bandValue=10;
-    }
-    else {
-      c = scoreHi;
-      //bandValue /= a3;
-      //bandValue=2;
-    }
-    //g = g*(1-g)*3.6;
-    //println(g*255, 230, score-a);
+//    if (j<=specSize/3) {
+//      c = scoreLow;
+//      //bandValue /= a1;
+//      //bandValue=0;
+//    }
+//    else if (j<=2*specSize/3) {
+//      c = scoreMid;
+//      //bandValue /= a2;
+//      //bandValue=10;
+//    }
+//    else {
+//      c = scoreHi;
+//      //bandValue /= a3;
+//      //bandValue=2;
+//    }
+    g = g*(1-g)*3.6;
+    //println((g*255)%256, score);
     //displayColor = color(hue%360, sat, bri);
-    displayColor = color((c + bandValue), 23+a-scoreHi, (score+a));
+    displayColor = color(g*220, 220, score);
     //displayColor = color(c%256, sat, bri);
     //displayColor = color(scoreLow, 230, scoreHi);
     //displayColor = color(40+scoreLow*2, 120+scoreMid*2, 100+scoreHi*2);
-    boid.custom(displayColor, bandValue, a, start);
+    boid.custom(displayColor, bandValue, a);
   }
    flock.run();
    //hue+=0.05;
@@ -197,6 +195,4 @@ void keyPressed() {
   }
   if (key=='c')
     ch = !ch;
-  if (key=='s')
-    start = !start;
 }

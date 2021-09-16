@@ -17,7 +17,7 @@ int displayChannel;
 boolean ch = true;
 boolean debug = false;
 Ball[] balls;
-Circle[][] circles;
+Circle[] circles;
 Boundary w1, w2, w3, w4;
 
 Box2DProcessing box2d;
@@ -34,23 +34,22 @@ void setup() {
   noStroke();
  
   player = new Player();
-  player.load(dataPath("/Users/tom/Desktop/git/processing4music/midi/media/ravel_bolero.mid"));
+  player.load(dataPath("/Users/tom/Desktop/git/processing4music/midi/media/07-lacri.mid"));
   //player.load(dataPath("/Users/tom/Desktop/git/processing4music/midi/media/musical_opfer_bwv-1079-4.mid"));
   //player.load(dataPath("/Users/tom/Desktop/git/processing4music/midi/media/Queen - Bohemian Rhapsody.mid"));
   
-  balls = new Ball[player.channelCount*2];
-  circles = new Circle[player.channelCount*2][12];
-  for (int i=0; i<player.channelCount*2; i++) {
-    
-    for (int j = 0; j<12; j++) {
-      circles[i][j] = new Circle(i, j);
-    }
+  balls = new Ball[player.channelCount];
+  
+  circles = new Circle[player.channelCount];
+
+  for (int i=0; i<player.channelCount; i++) {
 
     x = 40 + random(width-80);
     y = 40 + random(height-80);
       
     println(x, y);
     balls[i] = new Ball(x, y, 60, player.getBPM());
+    circles[i] = new Circle(x, y, 50);
   }
   w1 = new Boundary(width/2, -5, width, 10);
   w2 = new Boundary(width/2, height+5, width, 10);
@@ -62,7 +61,7 @@ void setup() {
 
 void draw() {
   if (ch)
-    background(255);
+    background(0);
   box2d.step();
   //w1.display();
   //w2.display();
@@ -72,9 +71,10 @@ void draw() {
   for (Note n: player.getNotes()) {
   
     displayChannel = player.list.indexOf(n.channel);
-    for (int i=0; i<2; i++) {
-    Ball b = balls[2*displayChannel+i];
-    Circle c = circles[2*displayChannel+i][n.noteClass];
+    
+    Circle c = circles[displayChannel];
+    Ball b = balls[displayChannel];
+    
     // Velocity: 0-127
     size = map(n.velocity, player.minV, player.maxV, 75, 250);
     //size = (16*size/player.channelCount) - n.living*2;
@@ -90,16 +90,14 @@ void draw() {
     );
     
     Vec2 pos = b.getPos();
-    if (n.living == 0) {
-      c.create(pos.x, pos.y, size, dc, n);
-    }
+    //if (n.living == 0) {
+    //  c.create(pos.x, pos.y, size, dc, n);
+    //}
      
   }
-  }
    player.update();
-      
-  for (Circle[] cs : circles)
-    for (Circle c: cs)
+   
+  for (Circle c : circles)
       c.display(); 
       
   for (Ball b1: balls)

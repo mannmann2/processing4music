@@ -14,7 +14,7 @@ class Boid {
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
   color c;
-  boolean s = false;
+  float s = 1;
   float prev = 0;
 
   Boid(float x, float y) {
@@ -22,26 +22,17 @@ class Boid {
     velocity = new PVector(random(-3,3),random(-3,3));
     position = new PVector(x,y);
     r = 3.0;
-    maxspeed = 6 ;
-    maxforce = 0.2;
+    maxspeed = 6;
+    maxforce = 0.05;
   }
   
-  void custom(color displayColor, float val, float a, boolean start){    
+  void custom(color displayColor, float val, float a){    
     //if (prev - 1 > val) {
     //  //println(prev, val);
     //  val = prev - 1;
     //  //prev = val;
     //}
     //r *= min(5, 1+val);
-    if (start) {
-      s = true;
-      maxspeed = 7;
-    }
-    else {
-      s = false;
-      maxspeed = 6;
-    }
-    
     r*=(1+val/a);
     this.c = displayColor;
     //prev = val;
@@ -63,20 +54,16 @@ class Boid {
   // We accumulate a new acceleration each time based on three rules
   void flock(ArrayList<Boid> boids) {
     PVector sep = separate(boids);   // Separation
-    sep.mult(2);
+    PVector ali = align(boids);      // Alignment
+    PVector coh = cohesion(boids);   // Cohesion
+    // Arbitrarily weight these forces
+    sep.mult(3);
+    ali.mult(1.0);
+    coh.mult(1.0);
+    // Add the force vectors to acceleration
     applyForce(sep);
-    
-    if (s) {
-      PVector ali = align(boids);      // Alignment
-      PVector coh = cohesion(boids);   // Cohesion
-      // Arbitrarily weight these forces
-  
-      ali.mult(1);
-      coh.mult(1);
-      // Add the force vectors to acceleration
-      applyForce(ali);
-      applyForce(coh);
-    }
+    applyForce(ali);
+    applyForce(coh);
   }
 
   // Method to update position
@@ -106,7 +93,7 @@ class Boid {
   void render() {
     // Draw a triangle rotated in the direction of velocity
     float theta = velocity.heading2D() + radians(90);
-    fill(c);
+    fill(c, 220);
     //stroke(0);
     noStroke();
     pushMatrix();
@@ -116,7 +103,6 @@ class Boid {
     vertex(0, -r*2);
     vertex(-r, r*2);
     vertex(r, r*2);
-    //circle(0, 0, 100);
     endShape();
     popMatrix();
   }
@@ -167,7 +153,7 @@ class Boid {
   // Alignment
   // For every nearby boid in the system, calculate the average velocity
   PVector align (ArrayList<Boid> boids) {
-    float neighbordist = 70;
+    float neighbordist = 60;
     PVector sum = new PVector(0,0);
     int count = 0;
     for (Boid other : boids) {
@@ -192,7 +178,7 @@ class Boid {
   // Cohesion
   // For the average position (i.e. center) of all nearby boids, calculate steering vector towards that position
   PVector cohesion (ArrayList<Boid> boids) {
-    float neighbordist = 100;
+    float neighbordist = 50;
     PVector sum = new PVector(0,0);   // Start with empty vector to accumulate all positions
     int count = 0;
     for (Boid other : boids) {

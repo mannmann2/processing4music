@@ -25,11 +25,10 @@ class Ball {
     rotate(-a);
     fill(0, 0);
     //strokeWeight(1);
-    if (d)
+    if (d) {
       stroke(0);
-    else
-      noStroke();
-    ellipse(0, 0, radius*2, radius*2);
+      ellipse(0, 0, radius*2, radius*2);
+    }
     // Let's add a line so we can see the rotation
     //line(0,0,r,0);
     popMatrix();

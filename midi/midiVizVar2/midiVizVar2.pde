@@ -6,8 +6,8 @@ PShader shader;
 Collection<Note> notes;
 
 void setup() {
-  //fullScreen(P3D);
-  size(1200, 720, P3D);
+  fullScreen(P3D);
+  //size(1200, 720, P3D);
   frameRate(60);
   background(0);
   colorMode(HSB);
@@ -22,7 +22,7 @@ void setup() {
 void draw() {
   
   //background(0);
-  shader.set("n", 20 * noise(frameCount * 0.001));  
+  //shader.set("n", 20 * noise(frameCount * 0.001));  
     
   notes = player.getNotes();
 

@@ -25,7 +25,8 @@ class Circle {
   void display() {
     if (show) {
     noStroke();
-    fill(dc1, 130 - frame * 0.3);
+    //fill(dc1, 130);
+    fill(dc1, 130 - frame * 0.1);
     circle(x1, y1, size1 + frame);
     frame ++;
     }

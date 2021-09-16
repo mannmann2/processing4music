@@ -1,6 +1,10 @@
+import javax.sound.midi.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 class Player implements Receiver {
   Sequencer sequencer;
@@ -10,7 +14,10 @@ class Player implements Receiver {
   Set<Integer> channels = new HashSet<Integer>();
   List<Integer> list;
   int channelCount;
-
+  int v, maxV=0, minV=127;
+  int n, maxN=0, minN=127;
+  int maxOct, minOct;
+  
   public void load(String path) {
     File midiFile = new File(path);
     try {
@@ -40,7 +47,19 @@ class Player implements Receiver {
               int cmd = m.getCommand();
               if (cmd == ShortMessage.NOTE_ON) {
                 channels.add(m.getChannel());
-                break;
+                
+                v = m.getData2();
+                if (v > maxV)
+                  maxV = v;
+                if (v < minV)
+                  minV = v;
+                  
+                n = m.getData1();
+                if (n > maxN)
+                  maxN = n;
+                if (n < minN)
+                  minN = n;
+
               }
 
               // log note-on or note-off events
@@ -53,11 +72,17 @@ class Player implements Receiver {
             }
           }
         }
+        maxOct = floor(maxN/12);
+        minOct = floor(minN/12);
         list = new ArrayList<Integer>(channels);
         channelCount = list.size();
         println("Channels:", channelCount);
+        println("V Range:", minV, "-", maxV);
+        println("N Range:", minN, "-", maxN);
+        println("O Range:", minOct, "-", maxOct);
+       
       }
-    }
+    } 
     catch(Exception e) {
       e.printStackTrace();
       exit();
@@ -66,6 +91,13 @@ class Player implements Receiver {
 
   public void start() {
     sequencer.start();
+  }
+
+  public void pause() {
+    if (sequencer.isRunning())
+      sequencer.stop();
+    else
+      sequencer.start();
   }
 
   public void update() {
@@ -92,9 +124,9 @@ class Player implements Receiver {
   public void send(MidiMessage message, long t) {
     if (message instanceof ShortMessage) {
       ShortMessage sm = (ShortMessage) message;
-      int cmd = sm.getCommand();
+      int cmd = sm.getCommand(); 
       if (cmd == ShortMessage.NOTE_ON || cmd == ShortMessage.NOTE_OFF) {
-        int channel = sm.getChannel();
+        int channel = sm.getChannel();      
         int note = sm.getData1();
         int velocity = sm.getData2();
         int id = channel * 1000 + note;

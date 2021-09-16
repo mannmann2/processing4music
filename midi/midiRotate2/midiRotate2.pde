@@ -18,7 +18,7 @@ void setup() {
   //player.load(dataPath("/Users/tom/Desktop/git/processing4music/midi/media/musical_opfer_bwv-1079-4.mid"));
   player.load(dataPath("/Users/tom/Desktop/git/processing4music/midi/media//Queen - Bohemian Rhapsody.mid"));
   player.start();
-  //shader = loadShader("shader.glsl");
+  shader = loadShader("/Users/tom/Desktop/git/processing4music/midi/media/shader.glsl");
 }
 
 void draw() {
@@ -32,8 +32,8 @@ void draw() {
   //directionalLight(30, 20, 255, 1, 1, 1);
   //directionalLight(150, 20, 255, -1, -1, -1);
   
-  translate(width/2, height/2);
-    
+  translate(width/2, height/6, -200);
+  rotateX(PI/3);
   notes = player.getNotes(); 
   
   for (Note n : notes) {
@@ -62,22 +62,39 @@ void draw() {
     pushMatrix();
 
     int displayChannel = player.list.indexOf(n.channel);
-    float dis = map(displayChannel, 0, player.channelCount, 200, height/2-20);
+    float dis = 2*map(displayChannel, 0, player.channelCount, 200, 0.6*height);
     
-    translate(0, dis, 0);
+    //translate(0, dis, 0);
     stroke(0);
-    strokeWeight(4);
+    strokeWeight(2);
     if (size > 0) {
-      box(size, n.velocity, 400.0 - n.living*1);
+      rotateX(max(PI/2-n.living, 0));
+      beginShape(TRIANGLE);
+      vertex(-50, dis, -50);
+      vertex( 50, dis, -50);
+      vertex(  0,   0,   0);
+      vertex(-50, dis, 50);
+      vertex( 50, dis, 50);
+      vertex(  0,   0,  0);
+      vertex(50, dis, -50);
+      vertex(50, dis,  50);
+      vertex( 0,   0,   0);
+      vertex(-50, dis,  50);
+      vertex(-50, dis, -50);
+      vertex(  0,   0,   0);
+      endShape();
+      //box(size, n.velocity, 400.0 - n.living*1); //
       //line(-10000, 0, 0, 10000, 0, 0);
-    }   
+      line(0, dis, 0, 0, 100000, 0);  
+    }
+    
     popMatrix();
     
     //translate(0, 5000.0, 0);
     //box(0.2, 10000, 0.6);
-    line(0, dis/4, 0, 0, 10000, 0);
-    strokeWeight(2);
-    circle(0,0,dis/2);
+     //
+    //strokeWeight(2);
+    //circle(0,0,dis/4);
     popMatrix();
   }
   player.update();
